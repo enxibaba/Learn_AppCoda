@@ -92,22 +92,54 @@ final class PhotoManager {
 
       let downloadGroup = DispatchGroup()
 
-      for address in [PhotoURLString.overlyAttachedGirlfriend,
-                      PhotoURLString.successKid,
-                      PhotoURLString.lotsOfFaces] {
-        let url = URL(string: address)
+      var address = [PhotoURLString.overlyAttachedGirlfriend,
+                     PhotoURLString.successKid,
+                     PhotoURLString.lotsOfFaces]
+
+      address += address + address
+
+      var blocks: [DispatchWorkItem] = []
+
+
+
+      for address in address {
 
         downloadGroup.enter()
 
-        let photo = DownloadPhoto(url: url!) { _, error in
-          if error != nil {
-            storedError = error
-          }
+        let block = DispatchWorkItem(flags: .inheritQoS) {
+          let url = URL(string: address)
 
-          downloadGroup.leave()
+          let photo = DownloadPhoto(url: url!) { _, error in
+            if error != nil {
+              storedError = error
+            }
+
+            downloadGroup.leave()
+          }
+          PhotoManager.shared.addPhoto(photo)
         }
-        PhotoManager.shared.addPhoto(photo)
+
+        blocks.append(block)
+
+        DispatchQueue.main.async(execute: block)
       }
+
+
+    // 5
+    for block in blocks[3..<blocks.count] {
+
+      // 6
+      let cancel = Bool.random()
+      if cancel {
+
+        // 7
+        block.cancel()
+
+        // 8
+        downloadGroup.leave()
+      }
+    }
+
 
       downloadGroup.notify(queue: DispatchQueue.main) {
         completion?(storedError)
