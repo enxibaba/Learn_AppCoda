@@ -55,7 +55,16 @@ final class PhotoManager {
   private var unsafePhotos: [Photo] = []
   
   var photos: [Photo] {
-    return unsafePhotos
+
+    var photoCopy: [Photo]!
+    // Dispatch synchronouly onto the concurrentPhotoQueue to perform the read.
+    concurrentPhotoQueue.sync {
+
+      photoCopy = self.unsafePhotos
+
+    }
+
+    return photoCopy
   }
   
   func addPhoto(_ photo: Photo) {
