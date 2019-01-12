@@ -68,8 +68,6 @@ final class PhotoDetailViewController: UIViewController {
     }
 
 
-
-
   }
 
 }
